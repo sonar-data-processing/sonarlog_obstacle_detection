@@ -11,7 +11,7 @@
 
 using namespace sonar_processing;
 
-namespace sonarlog_features {
+namespace sonarlog_obstacle_detection {
 
 class Application {
 public:
@@ -44,7 +44,7 @@ private:
     std::auto_ptr<base::Plot> plot_;
 };
 
-} /* namespace sonarlog_features */
+} /* namespace sonarlog_obstacle_detection */
 
 
 

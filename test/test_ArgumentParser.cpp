@@ -2,16 +2,16 @@
 #include <boost/test/unit_test.hpp>
 #include <cstdio>
 
-#include "sonarlog_features/ArgumentParser.hpp"
+#include "sonarlog_obstacle_detection/ArgumentParser.hpp"
 #include "base/test_config.h"
 
-using namespace sonarlog_features;
+using namespace sonarlog_obstacle_detection;
 
 BOOST_AUTO_TEST_CASE(input_file_is_nonexistent)
 {
     int argc = 3;
     char const *argv[3] = {
-        "sonarlog_features",
+        "sonarlog_obstacle_detection",
         "--input-file=nonexistent",
         "--stream-name=gemini.sonar_samples"
     };
@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_CASE(input_file_is_existent)
 
     int argc = 3;
     char const *argv[3] = {
-        "sonarlog_features",
+        "sonarlog_obstacle_detection",
         input_file_arg,
         "--stream-name=gemini.sonar_samples"
     };

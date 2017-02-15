@@ -1,8 +1,8 @@
 #include <iostream>
-#include "sonarlog_features/ArgumentParser.hpp"
-#include "sonarlog_features/Application.hpp"
+#include "sonarlog_obstacle_detection/ArgumentParser.hpp"
+#include "sonarlog_obstacle_detection/Application.hpp"
 
-using namespace sonarlog_features;
+using namespace sonarlog_obstacle_detection;
 
 int main(int argc, char const *argv[]) {
 

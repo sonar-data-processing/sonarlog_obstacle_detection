@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project (sonarlog_features)
+project (sonarlog_obstacle_detection)
 
 include ( "${WORKSPACE_DIR}/base/cmake/Dependencies.cmake"  )
 include ( "${WORKSPACE_DIR}/third_party/cmake/Gnuplot.cmake"  )
@@ -34,7 +34,7 @@ set ( SRCS ${SRCS} ${sonar_processing_SOURCES} )
 pkg_check_modules(pocolog_cpp pocolog_cpp)
 
 include_directories (
-    ${sonarlog_features_INCLUDE_DIR}
+    ${sonarlog_obstacle_detection_INCLUDE_DIR}
     ${base_INCLUDE_DIR}
     ${sonar_util_INCLUDE_DIR}
     ${rock_util_INCLUDE_DIR}
@@ -58,13 +58,13 @@ set (
 )
 
 add_executable (
-    sonarlog_features
+    sonarlog_obstacle_detection
     src/main.cpp
     ${SRCS}
 )
 
 target_link_libraries (
-    sonarlog_features
+    sonarlog_obstacle_detection
     ${LIBS}
 )
 
