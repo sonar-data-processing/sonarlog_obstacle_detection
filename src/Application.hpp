@@ -5,7 +5,6 @@
 #include <string>
 #include <deque>
 #include "rock_util/LogReader.hpp"
-#include "sonar_processing/TargetTrack.hpp"
 #include "sonar_processing/Denoising.hpp"
 #include "base/Plot.hpp"
 
