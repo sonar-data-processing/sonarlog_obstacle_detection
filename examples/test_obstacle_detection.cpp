@@ -10,6 +10,29 @@
 
 using namespace sonar_processing;
 
+cv::Mat getSymetricData(const cv::Mat& src) {
+    cv::Mat left  = src(cv::Rect(0, 0, src.cols * 0.5, src.rows));
+    cv::Mat right = src(cv::Rect(src.cols * 0.5, 0, src.cols * 0.5, src.rows));
+
+    cv::Mat left_mirror;
+    cv::flip(left, left_mirror, 1);
+
+    cv::Mat out_right = 1 - (left_mirror + right);
+    cv::medianBlur(out_right, out_right, 3);
+    out_right.setTo(0, out_right < 0.8);
+
+    cv::Mat out_left;
+    cv::flip(out_right, out_left, 1);
+
+    cv::Mat dst;
+    cv::hconcat(out_left, out_right, dst);
+    return dst;
+}
+
+void removeSparsenessBins() {
+
+}
+
 int main(int argc, char const *argv[]) {
 
     const std::string logfiles[] = {
@@ -34,12 +57,19 @@ int main(int argc, char const *argv[]) {
             cv::Mat cart_raw = holder.getCartImage();
             cv::Mat cart_mask = holder.getCartMask();
 
-            std::cout << "=== IDX : " << stream.current_sample_index() << std::endl;
-            std::cout << "=== BINS: " << sample.bin_count << std::endl;
+            cv::Mat cart_sym = getSymetricData(cart_raw);
+            cv::Mat cart_out = cart_raw - cart_sym;
+            cart_out.setTo(0, cart_out < 0);
+
+            std::cout << "========== IDX   : " << stream.current_sample_index() << std::endl;
+            std::cout << "========== BINS  : " << sample.bin_count << std::endl;
+            std::cout << "========== RANGE : " << (sample.bin_count * 0.05) << "m" << std::endl;
 
             // output
             cv::imshow("cart_raw", cart_raw);
-            cv::waitKey(5);
+            cv::imshow("cart_sym", cart_sym);
+            cv::imshow("cart_out", cart_out);
+            cv::waitKey();
         }
     }
 }
