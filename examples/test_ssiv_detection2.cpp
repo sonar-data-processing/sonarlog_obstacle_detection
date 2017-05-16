@@ -1,7 +1,6 @@
 #include <iostream>
 #include <deque>
 #include <base/samples/Sonar.hpp>
-#include "base/MathUtil.hpp"
 #include "base/test_config.h"
 #include "rock_util/LogReader.hpp"
 #include "rock_util/SonarSampleConverter.hpp"
@@ -11,29 +10,9 @@
 
 using namespace sonar_processing;
 
-cv::Mat getSymmetricData(const cv::Mat& src) {
-    cv::Mat left  = src(cv::Rect(0, 0, src.cols * 0.5, src.rows));
-    cv::Mat right = src(cv::Rect(src.cols * 0.5, 0, src.cols * 0.5, src.rows));
-
-    cv::Mat left_mirror;
-    cv::flip(left, left_mirror, 1);
-
-    cv::Mat out_right = 1 - (left_mirror + right);
-    cv::medianBlur(out_right, out_right, 3);
-    out_right.setTo(0, out_right < 0.8);
-
-    cv::Mat out_left;
-    cv::flip(out_right, out_left, 1);
-
-    cv::Mat dst;
-    cv::hconcat(out_left, out_right, dst);
-    return dst;
-}
-
 void removeSparsenessBins(std::deque<base::samples::Sonar>& window, const base::samples::Sonar& sample) {
-    if(window.empty() || (window.front().bin_count != sample.bin_count)) {
+    if(window.empty() || (window.front().bin_count != sample.bin_count))
         window.clear();
-    }
 
     window.push_front(sample);
 
@@ -53,10 +32,11 @@ void removeSparsenessBins(std::deque<base::samples::Sonar>& window, const base::
     }
 }
 
+
 int main(int argc, char const *argv[]) {
 
     const std::string logfiles[] = {
-        DATA_PATH_STRING + "/logs/micron_fix.log",
+        DATA_PATH_STRING + "/logs/ssiv/ssiv_20170511.0.log",
     };
 
     uint num_logfiles = sizeof(logfiles) / sizeof(std::string);
@@ -68,8 +48,10 @@ int main(int argc, char const *argv[]) {
         stream.set_current_sample_index(start_index);
 
         base::samples::Sonar sample;
-        ScanningHolder holder1(600, 600);
-        ScanningHolder holder2(600, 600);
+        base::Angle left_limit  = base::Angle::fromDeg(-45.0);
+        base::Angle right_limit = base::Angle::fromDeg( 45.0);
+        ScanningHolder holder1(600, 600, left_limit, right_limit);
+        ScanningHolder holder2(600, 600, left_limit, right_limit);
         std::deque<base::samples::Sonar> window;
 
         while (stream.current_sample_index() < stream.total_samples()) {
@@ -78,36 +60,27 @@ int main(int argc, char const *argv[]) {
             // update scanning holder
             holder1.update(sample);
             cv::Mat cart_raw = holder1.getCartImage();
+            cart_raw = cart_raw(cv::Rect(0, 0, cart_raw.cols, cart_raw.rows * 0.5));
 
             // remove sparseness bins
             removeSparsenessBins(window, sample);
-
             if (window.size() == 3) {
                 base::samples::Sonar processed = window.back();
                 window.pop_back();
 
                 holder2.update(processed);
                 cv::Mat cart_processed = holder2.getCartImage();
+                cart_processed = cart_processed(cv::Rect(0, 0, cart_processed.cols, cart_processed.rows * 0.5));
                 cv::imshow("cart_processed", cart_processed);
             }
 
-
-
-            // cv::Mat cart_mask = holder.getCartMask();
-
-            // // remove symmetric data
-            // cv::Mat cart_sym = getSymmetricData(cart_raw);
-            // cv::Mat cart_out = cart_raw - cart_sym;
-            // cart_out.setTo(0, cart_out < 0);
-
             // output
             cv::imshow("cart_raw", cart_raw);
-            // cv::imshow("cart_sym", cart_sym);
-            // cv::imshow("cart_out", cart_out);
-            std::cout << "========== IDX   : " << stream.current_sample_index() << std::endl;
-            std::cout << "========== BINS  : " << sample.bin_count << std::endl;
-            std::cout << "========== RANGE : " << (sample.bin_count * 0.05) << "m" << std::endl;
-            cv::waitKey(5);
+            std::cout   << "===== [IDX, BINS, RANGE] : ["
+                        << stream.current_sample_index() << ", "
+                        << sample.bin_count << ", "
+                        << sample.getBinStartDistance(sample.bin_count) << "m]" << std::endl;
+            cv::waitKey();
         }
     }
 }
